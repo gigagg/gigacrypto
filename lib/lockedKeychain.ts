@@ -1,6 +1,6 @@
 export interface LockedKeychain {
-  masterKey: string|null;
-  password: string;
+  masterKey?: string;
+  password?: string;
   salt: string;
   rsaKeys: {
     privateKey: string;

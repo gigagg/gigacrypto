@@ -1,15 +1,15 @@
-export function generateSalt() {
+/** generateSalt return a random array of 96 bytes */
+export function generateSalt(): Uint8Array {
   return crypto.getRandomValues(new Uint8Array(96));
 }
 
+/** pbkdf2 returns a hashed password (PBKDF2-HMAC-SHA256) */
 export async function pbkdf2(
   password: string,
   salt: Uint8Array,
   iterations = 1024,
   length = 128
-) {
-  // return codec.base64.fromBits(misc.pbkdf2(password, salt, 1024, 128));
-
+): Promise<Uint8Array> {
   const encoder = new TextEncoder();
   const encoded = encoder.encode(password);
 
@@ -39,21 +39,30 @@ export async function pbkdf2(
     ['sign']
   );
 
-  const rawKey = await crypto.subtle.exportKey('raw', key);
-
-  return uint8ToBase64(rawKey);
+  const result = await crypto.subtle.exportKey('raw', key);
+  return new Uint8Array(result);
 }
 
-function uint8ToBase64(buffer: ArrayBuffer) {
+export function toBase64(bytes: Uint8Array): string {
   let binary = '';
-  const len = buffer.byteLength;
-  const bytes = new Uint8Array(buffer);
+  const len = bytes.byteLength;
   for (let i = 0; i < len; i++) {
-      binary += String.fromCharCode(bytes[i]);
+    binary += String.fromCharCode(bytes[i]);
   }
   return btoa(binary);
 }
 
+export function fromBase64(data: string): Uint8Array {
+  const binStr = atob(data);
+  const arr = new Uint8Array(binStr.length);
+  const len = binStr.length;
+  for (let i = 0; i < len; i++) {
+    arr[i] = binStr.charCodeAt(i);
+  }
+  return arr;
+}
+
+/** decryptAes decrypt some data. Use TextEncoder/TextDecoder to convert to string */
 export async function decryptAes(
   data: Uint8Array,
   rawKey: Uint8Array,
@@ -83,10 +92,17 @@ export async function decryptAes(
   return decrypted;
 }
 
-export async function encryptAes(data: string, rawKey: Uint8Array) {
-  const encoder = new TextEncoder();
-  const encoded = encoder.encode(data);
-  const iv = crypto.getRandomValues(new Uint8Array(16));
+/** encryptAes encrypt some string. Use TextEncoder/TextDecoder to convert to string */
+export async function encryptAes(
+  data: Uint8Array,
+  rawKey: Uint8Array,
+  iv: Uint8Array | null = null
+) {
+  // const encoder = new TextEncoder();
+  // const encoded = encoder.encode(data);
+  if (iv == null) {
+    iv = crypto.getRandomValues(new Uint8Array(16));
+  }
 
   const key = await crypto.subtle.importKey(
     'raw',
@@ -96,7 +112,6 @@ export async function encryptAes(data: string, rawKey: Uint8Array) {
     ['encrypt', 'decrypt']
   );
 
-
   const encrypted = await crypto.subtle.encrypt(
     {
       name: 'AES-CBC',
@@ -104,7 +119,7 @@ export async function encryptAes(data: string, rawKey: Uint8Array) {
       length: 128,
     },
     key,
-    encoded
+    data
   );
 
   return { encrypted, iv };

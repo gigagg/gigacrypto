@@ -124,3 +124,33 @@ export async function encryptAes(
 
   return { encrypted, iv };
 }
+
+/** calculateFileKey take the sha1 of a file (hex encoded) and return its fkey */
+export async  function calculateFileKey(sha1: string) {
+  sha1 = sha1.toLowerCase();
+  const enc = new TextEncoder();
+  const data = await pbkdf2(
+    sha1,
+    enc.encode(
+      '={w|>6L:{Xn;HAKf^w=,fgSX}sfw)`hxopaqk.6Hg\';w23"sd+b07`LSOGqz#-)['
+    ),
+    32,
+    144
+  );
+  return toBase64(data);
+}
+
+/** calculateFileId take the sha1 of a file (hex encoded) and return its fid */
+export async function calculateFileId(sha1: string) {
+  sha1 = sha1.toLowerCase();
+  const enc = new TextEncoder();
+  const data = await pbkdf2(
+    sha1,
+    enc.encode(
+      "5%;[yw\"XG2&Om#i*T$v.B2'Ae/VST4t#u$@pxsauO,H){`hUd7Xu@4q4WCc<>'ie"
+    ),
+    32,
+    144
+  );
+  return toBase64(data);
+}

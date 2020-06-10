@@ -34,20 +34,36 @@ describe('Crypto::Keychain', () => {
     const keychain = await Keychain.import(importableKeychain, 'gigatribe');
     let exported = await keychain.export(true);
 
-    expect(exported.rsaKeys.publicKey).equal(importableKeychain.rsaKeys.publicKey);
-    expect(exported.rsaKeys.dekInfo.iv).equal(importableKeychain.rsaKeys.dekInfo.iv);
-    expect(exported.rsaKeys.dekInfo.salt).equal(importableKeychain.rsaKeys.dekInfo.salt);
-    expect(exported.rsaKeys.dekInfo.type).equal(importableKeychain.rsaKeys.dekInfo.type);
+    expect(exported.rsaKeys.publicKey).equal(
+      importableKeychain.rsaKeys.publicKey
+    );
+    expect(exported.rsaKeys.dekInfo.iv).equal(
+      importableKeychain.rsaKeys.dekInfo.iv
+    );
+    expect(exported.rsaKeys.dekInfo.salt).equal(
+      importableKeychain.rsaKeys.dekInfo.salt
+    );
+    expect(exported.rsaKeys.dekInfo.type).equal(
+      importableKeychain.rsaKeys.dekInfo.type
+    );
     expect(exported.salt).equal(importableKeychain.salt);
     // weak
     expect(exported.masterKey).equal('jELo/+hD23tTN1/tsGSeHw==');
     expect(exported.password).equal('gigatribe');
 
     exported = await keychain.export(false);
-    expect(exported.rsaKeys.publicKey).equal(importableKeychain.rsaKeys.publicKey);
-    expect(exported.rsaKeys.dekInfo.iv).equal(importableKeychain.rsaKeys.dekInfo.iv);
-    expect(exported.rsaKeys.dekInfo.salt).equal(importableKeychain.rsaKeys.dekInfo.salt);
-    expect(exported.rsaKeys.dekInfo.type).equal(importableKeychain.rsaKeys.dekInfo.type);
+    expect(exported.rsaKeys.publicKey).equal(
+      importableKeychain.rsaKeys.publicKey
+    );
+    expect(exported.rsaKeys.dekInfo.iv).equal(
+      importableKeychain.rsaKeys.dekInfo.iv
+    );
+    expect(exported.rsaKeys.dekInfo.salt).equal(
+      importableKeychain.rsaKeys.dekInfo.salt
+    );
+    expect(exported.rsaKeys.dekInfo.type).equal(
+      importableKeychain.rsaKeys.dekInfo.type
+    );
     expect(exported.salt).equal(importableKeychain.salt);
     // strong
     expect(exported.masterKey).equal(undefined);
@@ -77,8 +93,7 @@ describe('Crypto::Keychain', () => {
     try {
       await Keychain.import(exp1, 'wrong password');
       expect(true).equal(false);
-    } catch (error) {
-    }
+    } catch (error) {}
   });
 
   it('should generate the login password correctly', async () => {
@@ -87,4 +102,32 @@ describe('Crypto::Keychain', () => {
     expect(lp).equal('Ju51bwKeziurk32HMdVx8g==');
   });
 
+  it('should save and load a keychain', async () => {
+    const keychain = await Keychain.generate('azertyuiop');
+    const exp1 = await keychain.export();
+    await keychain.storeInLocalStorage('item_id', 'SomeGenericPassword');
+
+    const loaded = await Keychain.loadFromLocalStorage(
+      'item_id',
+      'SomeGenericPassword'
+    );
+    // tslint:disable-next-line: no-unused-expression
+    expect(loaded).to.not.be.null;
+    if (loaded == null) {
+      throw new Error('');
+    }
+    const exported = await loaded.export();
+
+    expect(exported.rsaKeys.publicKey).equal(exp1.rsaKeys.publicKey);
+    expect(exported.rsaKeys.dekInfo.iv).equal(exp1.rsaKeys.dekInfo.iv);
+    expect(exported.rsaKeys.dekInfo.salt).equal(exp1.rsaKeys.dekInfo.salt);
+    expect(exported.rsaKeys.dekInfo.type).equal(exp1.rsaKeys.dekInfo.type);
+    expect(exported.salt).equal(exp1.salt);
+  });
+
+  it('should be able to get the nodeKey', async () => {
+    const keychain = await Keychain.import(importableKeychain, 'gigatribe');
+    expect(keychain).not.equal(null);
+    expect(keychain.getUnencryptedNodeKey()).equal('3iBVzCEwx7jNMB1DeaUiYP0lnX0ICCxtXG1vOCnKWrg=');
+  });
 });

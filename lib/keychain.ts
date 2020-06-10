@@ -37,6 +37,60 @@ export class Keychain {
     return chain;
   }
 
+  public static async loadFromLocalStorage(
+    itemKey: string,
+    password: string
+  ): Promise<null | Keychain> {
+    const item = localStorage.getItem(itemKey);
+    if (item == null) {
+      return null;
+    }
+    try {
+      const value = JSON.parse(item);
+      if (
+        value == null ||
+        value.iv == null ||
+        value.encrypted == null ||
+        value.salt == null
+      ) {
+        return null;
+      }
+
+      const key = await pbkdf2(password, fromBase64(value.salt));
+      const decrypted = await decryptAes(
+        fromBase64(value.encrypted),
+        key,
+        fromBase64(value.iv)
+      );
+
+      const rawJson = new TextDecoder().decode(decrypted);
+      return await Keychain.import(JSON.parse(rawJson));
+
+    } catch (error) {
+      console.error('Error loading keychain from localStorage', error);
+      return null;
+    }
+  }
+
+  public async storeInLocalStorage(itemKey: string, password: string) {
+    // data to store
+    const rawJson = JSON.stringify(await this.export(true));
+
+    // aes encrypt
+    const salt = crypto.getRandomValues(new Uint8Array(96));
+    const data = new TextEncoder().encode(rawJson);
+    const key = await pbkdf2(password, salt);
+    const result = await encryptAes(data, key);
+
+    // store the value and a way to decrypt it
+    const value = {
+      iv: toBase64(result.iv),
+      encrypted: toBase64(new Uint8Array(result.encrypted)),
+      salt: toBase64(salt),
+    };
+    localStorage.setItem(itemKey, JSON.stringify(value));
+  }
+
   private async doImport(k: LockedKeychain) {
     if (k.password != null) {
       this.password = k.password;
@@ -191,7 +245,7 @@ export class Keychain {
     return this.rsaKeys.publicKeyToX509PemString();
   }
 
-  public async importNodeKey(nk: string) {
+  private async importNodeKey(nk: string) {
     if (this.rsaKeys == null) {
       throw new Error('rsaKeys should not be null.');
     }
@@ -210,7 +264,7 @@ export class Keychain {
     return new Uint8Array(nodeKey);
   }
 
-  public async exportNodeKey() {
+  private async exportNodeKey() {
     if (this.rsaKeys == null) {
       throw new Error('rsaKeys should not be null.');
     }
@@ -224,6 +278,14 @@ export class Keychain {
       throw new Error('NodeKey decryption failed');
     }
     return tmp;
+  }
+
+  public getUnencryptedNodeKey() {
+    if (this.nodeKey == null) {
+      throw new Error('nodeKey should not be null.');
+    }
+
+    return toBase64(this.nodeKey);
   }
 
   // WARNING: this is not compatible with the actual version of GiGa.GG !
@@ -249,15 +311,9 @@ export class Keychain {
     const enc = new TextEncoder();
     const salt = enc.encode(saltStr);
 
-    const password = await pbkdf2(
-      this.password,
-      salt,
-      1024,
-      128
-    );
+    const password = await pbkdf2(this.password, salt, 1024, 128);
     return toBase64(password);
   }
-
 }
 
 async function calculateMasterKey(

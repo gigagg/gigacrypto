@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { pbkdf2, encryptAes, decryptAes, toBase64 } from '../lib/utils';
+import { pbkdf2, encryptAes, decryptAes, toBase64, calculateFileKey, calculateFileId } from '../lib/utils';
 
 describe('Crypto::Utils', () => {
   it('pbkdf2 should work', async () => {
@@ -29,5 +29,13 @@ describe('Crypto::Utils', () => {
     const dec = decoder.decode(decrypted);
 
     expect(dec).equal('gigatribe');
+  });
+
+  it('should calculate fid/fkey', async () => {
+    const key = await calculateFileKey('177abc9bcd3bc9785b96e06fcf63d82c58b6f8f6');
+    expect(key).equal('V9leIEW8PYNMhlDuMNvkpWei');
+
+    const id = await calculateFileId('177abc9bcd3bc9785b96e06fcf63d82c58b6f8f6');
+    expect(id).equal('MUr243SzLSVf11/c7T0SZqyf');
   });
 });

@@ -20,3 +20,15 @@ if (typeof atob === 'undefined') {
     return new Buffer(b64Encoded, 'base64').toString('binary');
   };
 }
+
+if (typeof localStorage === 'undefined') {
+  global.localStorageImp = {};
+  global.localStorage = {
+    setItem: (key, value) => {
+      global.localStorageImp[key] = value;
+    },
+    getItem: (key) => {
+      return global.localStorageImp[key];
+    }
+  }
+}

@@ -65,7 +65,6 @@ export class Keychain {
 
       const rawJson = new TextDecoder().decode(decrypted);
       return await Keychain.import(JSON.parse(rawJson));
-
     } catch (error) {
       console.error('Error loading keychain from localStorage', error);
       return null;
@@ -313,6 +312,19 @@ export class Keychain {
 
     const password = await pbkdf2(this.password, salt, 1024, 128);
     return toBase64(password);
+  }
+
+  /** Change the password of the keychain. Remember to storeInLocalStorage the new keychain (and send the new password to the giga api) */
+  public changePassword(oldPassword: string, newPassword: string) {
+    if (
+      this.password != null &&
+      this.password !== '' &&
+      this.password !== oldPassword
+    ) {
+      throw new Error('password mismatch');
+    }
+
+    this.password = newPassword;
   }
 }
 

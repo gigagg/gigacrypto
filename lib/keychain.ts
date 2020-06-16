@@ -276,6 +276,9 @@ export class Keychain {
     if (tmp == null) {
       throw new Error('NodeKey decryption failed');
     }
+    if (tmp.length > 44) {
+      return dec.decode(fromBase64(tmp));
+    }
     return tmp;
   }
 

@@ -20,6 +20,23 @@ describe('Crypto::Keychain', () => {
     },
   };
 
+  const importableKeychain2: LockedKeychain = {
+    nodeKey:
+      'pZT+EwOnr+5DWPI35W4oMv+DlVfTG7R6YNUITUXUlQ95FKDlEVb5DOJ+b4congDW3AThrWzcHVbs1rRKVAVFiUCmA/KoKXrtQPC8c3Qdc8sxFLDOOns7MaVnBe/A0WKwhwNU8o6tjGm/xHS9n2uPPrZVEmGXOZ20MfmzkIdoBjY=',
+    rsaKeys: {
+      publicKey:
+        'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDKi4cBYGgjcflTY8QEZovRf5lTHuQx9Vx3+dM80gt04hPbu0fNv5Zx8ixRKGeImLNler6GtaDMtrr/8ekO4vWun0uhH7wkFau68mKHpaib8wLz0gUNTI2BsU41e0IY+q0Yg2k5UedrqkoWVTM+fQGcsiSGM4r7JKdQXDhXZT1X+QIDAQAB',
+      privateKey:
+        'g8Pc1PmxqLoMlovUpf6EwyqfaiTbd574gkmiW9KcUzi0eCxKM1LgHLNrRCopx928WLjo4WkfllaEcFvyMY1HwWMkgli66Be70UMoZpl0YQBw6mdSxsQ8EnCgkpZbESjGfBZATmenw5ipBYQf39/Qndc2dRfj4lpBxgaIO4RM+GEJmmjS/GQeX0E6e5QCeeaLT5JlM1TL/stSFj1r/xzoa+db8uCJahCw1BFj3ofvfTgpHKm3ZZww8O6iGc2aMxJBKwISy2vAa0URNI5wrD3DRGLOFStZDCnQCs1L3OwA4u5YakfMkzOhkwF1+iKS7tZDqc2rsUZAD2fp0hos/clT4bWuBqh8NWP2tHqXlvxSkvC/e/4w7P5kQbOoGrn/8L1CHbFqbM5Z2ziW9WyOa5XH2+hPJXqlBZNTMyocgv5UulnXao0CK6R3U6XLybc+BqqeuH5ZiIEx/a48mviU1GFCeOicNWl+TzhtjJTFynmLtc18hLkubpbNTOQ8N2nCGLzk5beFLe5/8849W5C/xpLIAQqHQjbVREooxmOCZINfPmkSsW3xzqO3TUYZlfq0wO5p2HRgXiBXvtvXL2+w7yqcREgmuhy7GwFRLyhbEdD8pCoBcnp18V1mkAK8w5L7aPtV8uu567KX0J2py7pyDZS5enlyRUOQ5ZjstK1q9KHMwbsU02jFkyXNLYj/zZtCl1HveyY6CHp7EFXTB8coGeKiNTioP1JNQlAw5ObXhs+bh0UObhN9izDqcynKkFa1SUGXpQYYBGInhv2Xmm3lyQOngN5+9OtfEGHmocYqffnMOd9rmFbe+Bx8KToOepPYoMTGp1q/CSEgxmdMRZxK/7JLwIz+hMd5sfK9V862v+C7fa3JdxxoTEUEop0pRcygq6tEaX3Snx7GdXn08MLiGdYnx+mesme9wFOkFRwYSWoaU2u3hth02A69usfHnjdx0Omx/89sIr49j/fl6zBwmHRblm7hKB8m5PzoWs22TA8gqiGwskqBSuJcmrZlSpWrFMy/UHYkCqeJ44aqptajcQCxRyhMI2x5VwTAaH7Jv1GcqlqGNCiz6BTDl6/tQ1oPjRAstMZ6JRfaR06ZBxOv5T+AdA==',
+      dekInfo: {
+        type: 'AES-128-CBC:1024',
+        iv: 'of3B4b5w3qfgY/anbOPkCw==',
+        salt: 'Nin4/dYcSmA=',
+      },
+    },
+    salt: 'bfaWtfjKMtqhb5UBHfceKHbDAVL07d3NMHG2iWxW5SU=',
+  };
+
   it('should generate a keychain', async () => {
     const keychain = await Keychain.generate('gigatribe');
     expect(keychain).not.equal(null);
@@ -27,6 +44,11 @@ describe('Crypto::Keychain', () => {
 
   it('should import a keychain', async () => {
     const keychain = await Keychain.import(importableKeychain, 'gigatribe');
+    expect(keychain).not.equal(null);
+  });
+
+  it('should import a keychain (2)', async () => {
+    const keychain = await Keychain.import(importableKeychain2, '123456');
     expect(keychain).not.equal(null);
   });
 

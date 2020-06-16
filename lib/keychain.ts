@@ -122,7 +122,7 @@ export class Keychain {
       throw new Error('password must not be null');
     }
     // generate a salt (the one stored in the user profile)
-    this.salt = crypto.getRandomValues(new Uint8Array(96));
+    this.salt = crypto.getRandomValues(new Uint8Array(32));
 
     // generate the master key from the password and salt
     this.masterKey = await calculateMasterKey(this.password, this.salt);

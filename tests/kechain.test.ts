@@ -84,6 +84,11 @@ describe('Crypto::Keychain', () => {
     // weak
     // expect(exported.masterKey).equal(random string here !);
     expect(exported.password).equal('gigatribe');
+
+    expect(exported.salt.length).equal(44);
+    expect(exported.nodeKey.length).to.be.above(171);
+    expect(exported.nodeKey.length).to.be.below(345);
+    expect(exported.masterKey?.length).equal(24);
   });
 
   it('should fail import when the password is wrong', async () => {
@@ -128,6 +133,8 @@ describe('Crypto::Keychain', () => {
   it('should be able to get the nodeKey', async () => {
     const keychain = await Keychain.import(importableKeychain, 'gigatribe');
     expect(keychain).not.equal(null);
-    expect(keychain.getUnencryptedNodeKey()).equal('3iBVzCEwx7jNMB1DeaUiYP0lnX0ICCxtXG1vOCnKWrg=');
+    expect(keychain.getUnencryptedNodeKey()).equal(
+      '3iBVzCEwx7jNMB1DeaUiYP0lnX0ICCxtXG1vOCnKWrg='
+    );
   });
 });

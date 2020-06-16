@@ -276,15 +276,16 @@ export class Keychain {
     if (tmp == null) {
       throw new Error('NodeKey decryption failed');
     }
-    if (tmp.length > 44) {
-      return dec.decode(fromBase64(tmp));
-    }
     return tmp;
   }
 
   public getUnencryptedNodeKey() {
     if (this.nodeKey == null) {
       throw new Error('nodeKey should not be null.');
+    }
+
+    if (this.nodeKey.byteLength === 44) {
+      return new TextDecoder().decode(this.nodeKey);
     }
 
     return toBase64(this.nodeKey);

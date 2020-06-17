@@ -254,11 +254,11 @@ export class Keychain {
       throw new Error('NodeKey decryption failed');
     }
 
-    let nodeKey = fromBase64(tmp);
-    if (nodeKey.byteLength > 44) {
-      const decoder = new TextDecoder();
-      nodeKey = fromBase64(decoder.decode(nodeKey));
-    }
+    const nodeKey = fromBase64(tmp);
+    // if (nodeKey.byteLength > 44) {
+    //   const decoder = new TextDecoder();
+    //   nodeKey = fromBase64(decoder.decode(nodeKey));
+    // }
 
     return new Uint8Array(nodeKey);
   }
@@ -319,7 +319,10 @@ export class Keychain {
   }
 
   /** Change the password of the keychain. Remember to storeInLocalStorage the new keychain (and send the new password to the giga api) */
-  public changePassword(oldPassword: string, newPassword: string) {
+  public async changePassword(oldPassword: string, newPassword: string) {
+    if (this.salt == null) {
+      throw new Error('Salt must not be null');
+    }
     if (
       this.password != null &&
       this.password !== '' &&
@@ -329,6 +332,7 @@ export class Keychain {
     }
 
     this.password = newPassword;
+    this.masterKey = await calculateMasterKey(this.password, this.salt);
   }
 }
 

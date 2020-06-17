@@ -49,6 +49,7 @@ describe('Crypto::Keychain', () => {
 
   it('should import a keychain (2)', async () => {
     const keychain = await Keychain.import(importableKeychain2, '123456');
+    keychain.showMasterKey();
     expect(keychain).not.equal(null);
   });
 
@@ -158,5 +159,14 @@ describe('Crypto::Keychain', () => {
     expect(keychain.getUnencryptedNodeKey()).equal(
       '3iBVzCEwx7jNMB1DeaUiYP0lnX0ICCxtXG1vOCnKWrg='
     );
+  });
+
+  it('should be able to change the password', async () => {
+    const keychain = await Keychain.import(importableKeychain, 'gigatribe');
+    await keychain.changePassword('gigatribe', '123456');
+    const exported = await keychain.export();
+    expect(exported.rsaKeys.privateKey).not.equal(importableKeychain.rsaKeys.privateKey);
+
+    await Keychain.import(exported, '123456');
   });
 });

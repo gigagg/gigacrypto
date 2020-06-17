@@ -49,7 +49,6 @@ describe('Crypto::Keychain', () => {
 
   it('should import a keychain (2)', async () => {
     const keychain = await Keychain.import(importableKeychain2, '123456');
-    keychain.showMasterKey();
     expect(keychain).not.equal(null);
   });
 

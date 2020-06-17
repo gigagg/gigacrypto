@@ -1,6 +1,6 @@
 {
   "name": "gigacrypto",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "This package does the encrypting/generation of key for GiGa.gg file encryption",
   "main": "dist/index.js",
   "scripts": {

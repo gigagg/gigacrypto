@@ -1,3 +1,5 @@
+import { decode64, encode64 } from './base64';
+
 /** generateSalt return a random array of 96 bytes */
 export function generateSalt(): Uint8Array {
   return crypto.getRandomValues(new Uint8Array(96));
@@ -44,22 +46,11 @@ export async function pbkdf2(
 }
 
 export function toBase64(bytes: Uint8Array): string {
-  let binary = '';
-  const len = bytes.byteLength;
-  for (let i = 0; i < len; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  return btoa(binary);
+  return encode64(bytes);
 }
 
-export function fromBase64(data: string): Uint8Array {
-  const binStr = atob(data);
-  const arr = new Uint8Array(binStr.length);
-  const len = binStr.length;
-  for (let i = 0; i < len; i++) {
-    arr[i] = binStr.charCodeAt(i);
-  }
-  return arr;
+export function fromBase64(input: string): Uint8Array {
+  return decode64(input);
 }
 
 /** decryptAes decrypt some data. Use TextEncoder/TextDecoder to convert to string */

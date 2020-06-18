@@ -1,6 +1,8 @@
 import { expect } from 'chai';
 import { Keychain } from './../lib/keychain';
 import { LockedKeychain } from '../lib/lockedKeychain';
+import { RSAKey } from '../lib/jsbn/RSAKey';
+import { toBase64 } from '../lib/utils';
 
 describe('Crypto::Keychain', () => {
   const importableKeychain: LockedKeychain = {

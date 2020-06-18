@@ -141,6 +141,9 @@ export class Keychain {
 
     // generate the nodeKey
     this.nodeKey = crypto.getRandomValues(new Uint8Array(32));
+    this.nodeKey = new TextEncoder().encode(
+      toBase64(this.nodeKey).slice(0, 32)
+    );
 
     // generate the dekInfo (for locking the private key)
     this.dekInfo = {
@@ -262,11 +265,17 @@ export class Keychain {
       throw new Error('NodeKey decryption failed');
     }
 
-    const nodeKey = fromBase64(tmp);
-    // if (nodeKey.byteLength > 44) {
-    //   const decoder = new TextDecoder();
-    //   nodeKey = fromBase64(decoder.decode(nodeKey));
-    // }
+    let nodeKey = fromBase64(tmp);
+    while (nodeKey.byteLength >= 44) {
+      const decoder = new TextDecoder();
+      nodeKey = fromBase64(decoder.decode(nodeKey));
+    }
+
+    if (nodeKey.byteLength !== 32) {
+      throw new Error(
+        'Cannot import nodeKey: length 32 != ' + nodeKey.byteLength
+      );
+    }
 
     return new Uint8Array(nodeKey);
   }
@@ -280,7 +289,7 @@ export class Keychain {
     }
 
     const dec = new TextDecoder();
-    const tmp = this.rsaKeys.encrypt64(dec.decode(this.nodeKey));
+    const tmp = this.rsaKeys.encrypt64(toBase64(this.nodeKey));
     if (tmp == null) {
       throw new Error('NodeKey decryption failed');
     }
@@ -290,10 +299,6 @@ export class Keychain {
   public getUnencryptedNodeKey() {
     if (this.nodeKey == null) {
       throw new Error('nodeKey should not be null.');
-    }
-
-    if (this.nodeKey.byteLength === 44) {
-      return new TextDecoder().decode(this.nodeKey);
     }
 
     return toBase64(this.nodeKey);

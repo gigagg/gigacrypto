@@ -1,6 +1,14 @@
 import { LockedKeychain } from './lockedKeychain';
-import { pbkdf2, toBase64, encryptAes, fromBase64, decryptAes } from './utils';
+import {
+  pbkdf2,
+  toBase64,
+  encryptAes,
+  fromBase64,
+  decryptAes,
+  calculateFileKey,
+} from './utils';
 import { RSAKey } from './jsbn/RSAKey';
+import { utils } from 'mocha';
 
 export class Keychain {
   private readonly rsaLength = 1024;
@@ -333,6 +341,20 @@ export class Keychain {
 
     this.password = newPassword;
     this.masterKey = await calculateMasterKey(this.password, this.salt);
+  }
+
+  /** Calculate the file key and encrypt it with the nodekey */
+  public async fileKeyEncrypted(sha1: string) {
+    if (this.nodeKey == null) {
+      throw new Error('nodekey must not be null');
+    }
+    const fileKey = await calculateFileKey(sha1);
+    const raw = await encryptAes(
+      new TextEncoder().encode(fileKey),
+      this.nodeKey.slice(0, 16),
+      this.nodeKey.slice(16)
+    );
+    return toBase64(new Uint8Array(raw.encrypted));
   }
 }
 

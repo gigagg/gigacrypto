@@ -168,4 +168,10 @@ describe('Crypto::Keychain', () => {
 
     await Keychain.import(exported, '123456');
   });
+
+  it('should be able to calculate end encrypt a filekey', async () => {
+    const keychain = await Keychain.import(importableKeychain, 'gigatribe');
+    const fkey = await keychain.fileKeyEncrypted('gigatribe');
+    expect(fkey.length).equal(44);
+  });
 });

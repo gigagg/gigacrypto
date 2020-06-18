@@ -343,14 +343,14 @@ export class Keychain {
     this.masterKey = await calculateMasterKey(this.password, this.salt);
   }
 
-  /** Calculate the file key and encrypt it with the nodekey */
-  public async fileKeyEncrypted(sha1: string) {
+  /** Encrypt some data using the nodekey as key/iv. Data will be encrypted as is. */
+  public async aesEncryptWithNodeKey(data: string) {
     if (this.nodeKey == null) {
       throw new Error('nodekey must not be null');
     }
-    const fileKey = await calculateFileKey(sha1);
+    // const fileKey = await calculateFileKey(sha1);
     const raw = await encryptAes(
-      new TextEncoder().encode(fileKey),
+      new TextEncoder().encode(data),
       this.nodeKey.slice(0, 16),
       this.nodeKey.slice(16)
     );

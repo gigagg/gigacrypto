@@ -164,14 +164,19 @@ describe('Crypto::Keychain', () => {
     const keychain = await Keychain.import(importableKeychain, 'gigatribe');
     await keychain.changePassword('gigatribe', '123456');
     const exported = await keychain.export();
-    expect(exported.rsaKeys.privateKey).not.equal(importableKeychain.rsaKeys.privateKey);
+    expect(exported.rsaKeys.privateKey).not.equal(
+      importableKeychain.rsaKeys.privateKey
+    );
 
     await Keychain.import(exported, '123456');
   });
 
   it('should be able to calculate end encrypt a filekey', async () => {
     const keychain = await Keychain.import(importableKeychain, 'gigatribe');
-    const fkey = await keychain.fileKeyEncrypted('gigatribe');
+    const fkey = await keychain.aesEncryptWithNodeKey(
+      '2zl8/2ADaRE6AGEIFFU/2d+G'
+    );
     expect(fkey.length).equal(44);
+    expect(fkey).equal('ftFtDfl9uH2RhrWjghS/henUKt7sa4PJHbMRilMBvs4=');
   });
 });

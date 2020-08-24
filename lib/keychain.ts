@@ -13,6 +13,7 @@ import { utils } from 'mocha';
 export class Keychain {
   private readonly rsaLength = 1024;
   private readonly rsaExp = '10001';
+  private readonly challengeData = 'dE9yL9kF6nU1zJ0fC4tQ6zY5lO2mN4hE';
 
   private password: string | null;
 
@@ -38,7 +39,7 @@ export class Keychain {
 
   public static async import(
     k: LockedKeychain,
-    password?: string
+    password?: string,
   ): Promise<Keychain> {
     const chain = new Keychain(password || null);
     await chain.doImport(k);
@@ -123,6 +124,10 @@ export class Keychain {
     await this.importPublicKey(k.rsaKeys.publicKey);
 
     this.nodeKey = await this.importNodeKey(k.nodeKey);
+
+    if (k.challenge != null) {
+      this.uncipherChallenge(k.challenge);
+    }
   }
 
   private async doGenerate() {
@@ -163,6 +168,7 @@ export class Keychain {
     const privateKey = await this.exportPrivateKey();
     const publicKey = await this.exportPublicKey();
     const nodeKey = await this.exportNodeKey();
+    const challenge = await this.aesEncryptWithNodeKey(this.challengeData);
     const locked: LockedKeychain = {
       salt,
       rsaKeys: {
@@ -175,6 +181,7 @@ export class Keychain {
         },
       },
       nodeKey,
+      challenge,
     };
 
     if (weak) {
@@ -184,6 +191,13 @@ export class Keychain {
       }
     }
     return locked;
+  }
+
+  public async uncipherChallenge(challenge: string) {
+    const chal = await this.aesDecryptWithNodeKey(challenge);
+    if (new TextDecoder().decode(chal) !== this.challengeData) {
+      throw new Error('Challenge failed.');
+    }
   }
 
   private async exportPrivateKey() {
@@ -353,13 +367,27 @@ export class Keychain {
     if (this.nodeKey == null) {
       throw new Error('nodekey must not be null');
     }
-    // const fileKey = await calculateFileKey(sha1);
     const raw = await encryptAes(
       new TextEncoder().encode(data),
       this.nodeKey.slice(0, 16),
       this.nodeKey.slice(16)
     );
     return toBase64(new Uint8Array(raw.encrypted));
+  }
+
+  /**
+   * Decrypt some data using the nodekey as key/iv.
+   * Data is a base64 encode.
+   */
+  public async aesDecryptWithNodeKey(data: string) {
+    if (this.nodeKey == null) {
+      throw new Error('nodekey must not be null');
+    }
+    return await decryptAes(
+      fromBase64(data),
+      this.nodeKey.slice(0, 16),
+      this.nodeKey.slice(16)
+    );
   }
 }
 

@@ -8,6 +8,7 @@ export interface LockedKeychain {
     dekInfo: DekInfo;
   };
   nodeKey: string;
+  challenge?: string;
 }
 
 export interface DekInfo {

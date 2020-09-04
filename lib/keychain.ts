@@ -126,7 +126,7 @@ export class Keychain {
     this.nodeKey = await this.importNodeKey(k.nodeKey);
 
     if (k.challenge != null) {
-      this.uncipherChallenge(k.challenge);
+      await this.uncipherChallenge(k.challenge);
     }
   }
 

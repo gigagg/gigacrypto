@@ -5,10 +5,8 @@ import {
   encryptAes,
   fromBase64,
   decryptAes,
-  calculateFileKey,
 } from './utils';
 import { RSAKey } from './jsbn/RSAKey';
-import { utils } from 'mocha';
 
 export class Keychain {
   private readonly rsaLength = 1024;
